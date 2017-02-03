@@ -125,7 +125,7 @@ function findById(id) {
     dataType: "json",
     success: function(data){
       $('#btnDelete').show();
-      console.log('findById success: ' + data.title);
+      console.log('findById success: ' + data.name);
       currentBook = data;
       renderDetails(currentBook);
     }
@@ -188,13 +188,13 @@ function renderList(data) {
 
   $('#bookList li').remove();
   $.each(list, function(index, book) {
-    $('#bookList').append('<li><a href="#" data-identity="' + book.id + '">'+book.title+'</a></li>');
+    $('#bookList').append('<li><a href="#" data-identity="' + book.id + '">'+book.name+'</a></li>');
   });
 }
 
 function renderDetails(book) {
   // $('#bookId').val(book.id);
-  $('#title').val(book.title);
+  $('#name').val(book.name);
   $('#author').val(book.author);
   $('#date').val(book.date);
 }
@@ -204,7 +204,7 @@ function formToJSON() {
   // var bookId = $('#bookId').val();
   return JSON.stringify({
     // "id": bookId == "" ? null : bookId,
-    "title": $('#title').val(),
+    "name": $('#name').val(),
     "author": $('#author').val(),
     "date": $('#date').val()
   });
