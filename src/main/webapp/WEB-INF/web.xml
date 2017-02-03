@@ -21,7 +21,7 @@
   </servlet-mapping>
   <context-param>
     <param-name>resteasy.servlet.mapping.prefix</param-name>
-    <param-value>/book</param-value>
+    <param-value>/</param-value>
   </context-param>
   <context-param>
     <param-name>resteasy.resources</param-name>
