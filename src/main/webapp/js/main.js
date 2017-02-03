@@ -1,5 +1,5 @@
 // The root URL for the RESTful services
-var rootURL = "http://localhost:8080/book";
+var rootURL = "http://localhost:8080/rest-1.0-SNAPSHOT/book";
 
 var currentBook;
 
