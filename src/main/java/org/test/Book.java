@@ -7,9 +7,33 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement
 public class Book {
-  String title;
+  String name;
   String author;
   String date;
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getAuthor() {
+    return author;
+  }
+
+  public void setAuthor(String author) {
+    this.author = author;
+  }
+
+  public String getDate() {
+    return date;
+  }
+
+  public void setDate(String date) {
+    this.date = date;
+  }
 
   @Override
   public boolean equals(Object obj) {
@@ -18,6 +42,6 @@ public class Book {
     if (!(obj instanceof Book))return false;
 
     Book a = (Book) obj;
-    return this.title.equals(a.title);
+    return this.name.equals(a.name);
   }
 }
