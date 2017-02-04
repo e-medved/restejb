@@ -3,38 +3,23 @@ var rootURL = "http://localhost:8080/rest-1.0-SNAPSHOT/book";
 
 var currentBook;
 
-// Retrieve book list when application starts
-// findAll();
+getList();
 
-getPublic();
-
-// Nothing to delete in initial application state
+$(function() {
+  $('#date').datepicker();
+});
 $('#btnDelete').hide();
 
+// listeners
 $('#btnPublic').click(function() {
-  getPublic();
+  getList('/public');
   return false;
 });
 
 $('#btnPrivate').click(function() {
-  getPrivate();
+  getList('/private');
   return false;
 });
-
-// Register listeners
-// $('#btnSearch').click(function() {
-//   search($('#searchKey').val());
-//   return false;
-// });
-
-// Trigger search when pressing 'Return' on search key input field
-// $('#searchKey').keypress(function(e){
-//   if(e.which == 13) {
-//     search($('#searchKey').val());
-//     e.preventDefault();
-//     return false;
-//   }
-// });
 
 $('#btnAdd').click(function() {
   newBook();
@@ -42,10 +27,7 @@ $('#btnAdd').click(function() {
 });
 
 $('#btnSave').click(function() {
-  if ($('#bookId').val() == '')
-    addBook();
-  else
-    updateBook();
+  saveBook();
   return false;
 });
 
@@ -54,136 +36,69 @@ $('#btnDelete').click(function() {
   return false;
 });
 
-$('#bookList a').live('click', function() {
-  findById($(this).data('identity'));
+$('#btnMove').click(function() {
+  moveBook();
+  return false;
 });
 
-// Replace broken images with generic book bottle
-// $("img").error(function(){
-//   $(this).attr("src", "pics/generic.jpg");
-//
-// });
-
-// function search(searchKey) {
-//   if (searchKey == '')
-//     findAll();
-//   else
-//     findByName(searchKey);
-// }
+$('#bookList a').live('click', function() {
+  getByName($(this).text());
+});
 
 function newBook() {
   $('#btnDelete').hide();
-  currentBook = {};
-  renderDetails(currentBook); // Display empty form
+  renderDetails({}); // Clean
 }
 
-function findAll() {
-  console.log('findAll');
-  $.ajax({
-    type: 'GET',
-    url: rootURL,
-    dataType: "json", // data type of response
-    success: renderList
-  });
+function getList(catalogType) {
+  console.log('getList');
+  if (catalogType === undefined)
+    catalogType = $('#isPrivate').is(':checked') ? '/private' : '/public';
+
+  callAjax('GET', rootURL+catalogType, null, renderList);
 }
 
-function getPublic() {
-  console.log('getPublic');
-  $.ajax({
-    type: 'GET',
-    url: rootURL+"/public",
-    dataType: "json", // data type of response
-    success: renderList
-  });
-}
-
-function getPrivate() {
-  console.log('getPrivate');
-  $.ajax({
-    type: 'GET',
-    url: rootURL+"/private",
-    dataType: "json", // data type of response
-    success: renderList
-  });
-}
-
-function findByName(searchKey) {
-  console.log('findByName: ' + searchKey);
-  $.ajax({
-    type: 'GET',
-    url: rootURL + '/search/' + searchKey,
-    dataType: "json",
-    success: renderList
-  });
-}
-
-function findById(id) {
-  console.log('findById: ' + id);
-  $.ajax({
-    type: 'GET',
-    url: rootURL + '/' + id,
-    dataType: "json",
-    success: function(data){
+function getByName(name) {
+  console.log('getByName: ' + name);
+  callAjax('GET', rootURL + '/' + name, null,
+    function(data){
       $('#btnDelete').show();
-      console.log('findById success: ' + data.name);
+      console.log('getByName success: ' + data.name);
       currentBook = data;
       renderDetails(currentBook);
-    }
-  });
+    });
 }
 
-function addBook() {
-  console.log('addBook');
-  $.ajax({
-    type: 'POST',
-    contentType: 'application/json',
-    url: rootURL,
-    dataType: "json",
-    data: formToJSON(),
-    success: function(data, textStatus, jqXHR){
-      alert('Book created successfully');
-      $('#btnDelete').show();
-      // $('#bookId').val(data.id);
-    },
-    error: function(jqXHR, textStatus, errorThrown){
-      alert('addBook error: ' + textStatus);
-    }
-  });
+function saveBook() {
+  console.log('saveBook');
+  var data = formToJSON();
+  if (data)
+    callAjax('POST', rootURL, data,
+      function(data, textStatus, jqXHR){
+        $('#btnDelete').show();
+        getList();
+      });
+  else
+    alert('Book name is required');
 }
 
-function updateBook() {
-  console.log('updateBook');
-  $.ajax({
-    type: 'PUT',
-    contentType: 'application/json',
-    url: rootURL + '/' + $('#bookId').val(),
-    dataType: "json",
-    data: formToJSON(),
-    success: function(data, textStatus, jqXHR){
-      alert('Book updated successfully');
-    },
-    error: function(jqXHR, textStatus, errorThrown){
-      alert('updateBook error: ' + textStatus);
-    }
-  });
+function moveBook() {
+  console.log('moveBook');
+  $('#isPrivate').prop('checked', !$('#isPrivate').is(':checked'));
+  saveBook();
 }
 
 function deleteBook() {
   console.log('deleteBook');
-  $.ajax({
-    type: 'DELETE',
-    url: rootURL + '/' + $('#bookId').val(),
-    success: function(data, textStatus, jqXHR){
+  callAjax('DELETE', rootURL + '/' + $('#name').val(), null,
+    function(data, textStatus, jqXHR){
       alert('Book deleted successfully');
-    },
-    error: function(jqXHR, textStatus, errorThrown){
-      alert('deleteBook error');
-    }
-  });
+      getList();
+      renderDetails({}); // Clean
+    });
 }
 
 function renderList(data) {
-  // JAX-RS serializes an empty list as null, and a 'collection of one' as an object (not an 'array of one')
   var list = data == null ? [] : (data instanceof Array ? data : [data]);
 
   $('#bookList li').remove();
@@ -192,20 +107,36 @@ function renderList(data) {
   });
 }
 
-function renderDetails(book) {
-  // $('#bookId').val(book.id);
+function  renderDetails(book) {
   $('#name').val(book.name);
   $('#author').val(book.author);
   $('#date').val(book.date);
+  $('#isPrivate').prop('checked', book.isPrivate);
 }
 
-// Helper function to serialize all the form fields into a JSON string
 function formToJSON() {
-  // var bookId = $('#bookId').val();
+  if (!$('#name').val())
+    return null;
   return JSON.stringify({
-    // "id": bookId == "" ? null : bookId,
     "name": $('#name').val(),
     "author": $('#author').val(),
-    "date": $('#date').val()
+    "date": $('#date').val(),
+    "isPrivate": $('#isPrivate').is(':checked')
   });
+}
+
+function callAjax(type, url, data, success){
+  $.ajax({
+    type: type,
+    contentType: 'application/json',
+    url: url,
+    dataType: 'json',
+    data: data,
+    success: success,
+    error: ajaxError
+  });
+}
+
+function ajaxError(jqXHR, textStatus, errorThrown){
+  alert('Ajax call error: ' + errorThrown);
 }
