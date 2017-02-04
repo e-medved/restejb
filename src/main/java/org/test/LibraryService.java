@@ -6,15 +6,19 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
 
-/**
- * Created by root on 2/2/17.
- */
+
 @Singleton
 @Path("/book")
 public class LibraryService {
 
   @EJB
-  Catalog catalog;
+  private Catalog catalog;
+
+  @GET @Path("/{name}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Book getByName(@PathParam("name") String name) {
+    return catalog.findByName(name);
+  }
 
   @GET @Path("/public")
   @Produces(MediaType.APPLICATION_JSON)
@@ -32,17 +36,14 @@ public class LibraryService {
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
   public Book create(Book book) {
-    catalog.getPublicCatalog().add(book);
+    catalog.addOrUpdate(book);
     return book;
   }
 
-  @DELETE @Path("/")
+  @DELETE @Path("/{name}")
   @Produces(MediaType.APPLICATION_JSON)
-  public void remove(@QueryParam("title") String title) {
-
-    catalog.removeByTitle(title);
+  public void remove(@PathParam("name") String name) {
+    catalog.removeByName(name);
   }
-
-
 
 }

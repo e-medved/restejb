@@ -2,14 +2,13 @@ package org.test;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-/**
- * Created by root on 2/2/17.
- */
+
 @XmlRootElement
 public class Book {
-  String name;
-  String author;
-  String date;
+  private String name;
+  private String author;
+  private String date;
+  boolean isPrivate;
 
   public String getName() {
     return name;
@@ -33,6 +32,14 @@ public class Book {
 
   public void setDate(String date) {
     this.date = date;
+  }
+
+  public boolean getIsPrivate() {
+    return isPrivate;
+  }
+
+  public void setIsPrivate(boolean aPrivate) {
+    isPrivate = aPrivate;
   }
 
   @Override
